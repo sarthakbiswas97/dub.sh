@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
-import { customAlphabet } from 'nanoid';
 
-const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', 6);
-
+// import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid'
 
 
 export const createUrl = async (req:Request, res:Response) => {
@@ -15,7 +14,7 @@ export const createUrl = async (req:Request, res:Response) => {
             return
         }
 
-        const shortId = nanoid();
+        const shortId = nanoid(5)
         const shortUrl = await prisma.url.create({
             data:{
                 shortUrl: `${shortId}.com`,

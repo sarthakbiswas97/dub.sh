@@ -39,8 +39,6 @@ export default function Home() {
       return;
     }
 
-    console.log("url is ", `${API_URL}/api/v1/create-url`)
-
     try {
       const response = await axios.post(`${API_URL}/api/v1/create-url`, {
         url: value,
@@ -105,7 +103,7 @@ export default function Home() {
         {shortUrl && (
           <div className="p-4 border rounded-lg bg-white shadow-sm flex justify-between items-center gap-2">
             <p className="text-gray-600 break-all">
-              {`dubsh.sbiswas.xyz/${shortUrl}`}
+              {`api.dubsh.sbiswas.xyz/${shortUrl}`}
             </p>
             <Button 
               onClick={handleCopy} 

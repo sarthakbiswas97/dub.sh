@@ -10,6 +10,10 @@ dotenv.config();
 app.use(cors());
 app.use(express.json());
 
+app.get("/health",(req,res)=>{
+    res.status(200).json({msg:`server is healthy`})
+})
+
 app.use("/api/v1",urlRoute)
 
 app.listen("3000",()=>{

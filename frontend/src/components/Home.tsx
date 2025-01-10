@@ -3,16 +3,22 @@ import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { useState } from "react";
 
+
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Home() {
   const [value, setValue] = useState("");
   const [shortUrl, setShortUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(`localhost:3000/api/v1/${shortUrl}`);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (shortUrl) {
+        await navigator.clipboard.writeText(`${window.location.origin}/${shortUrl}`);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
     } catch (err) {
       console.error("Failed to copy text:", err);
     }
@@ -20,24 +26,35 @@ export default function Home() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
+    setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null);
+
+    if (!value.trim()) {
+      setError("Please enter a URL");
+      return;
+    }
 
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/v1/create-url",
-        {
-          url: value,
+      const response = await axios.post(`${API_URL}/api/v1/create-url`, {
+        url: value,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
         }
-      );
+      });
 
-      console.log(response.data.shortUrl.shortUrl);
-
-      setShortUrl(response.data.shortUrl.shortUrl);
+      if (response.data?.shortUrl?.shortUrl) {
+        setShortUrl(response.data.shortUrl.shortUrl);
+      } else {
+        throw new Error('Invalid response format');
+      }
     } catch (error) {
-      console.error(error);
+      console.error('Error shortening URL:', error);
+      setError(error instanceof Error ? error.message : 'Failed to shorten URL');
     }
   };
 
@@ -50,9 +67,10 @@ export default function Home() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            type="text"
+            type="url"
             placeholder="Shorten any link"
             onChange={handleChange}
+            value={value}
             className="w-full h-12"
           />
           <Button
@@ -63,10 +81,16 @@ export default function Home() {
           </Button>
         </form>
 
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+            {error}
+          </div>
+        )}
+
         {shortUrl && (
           <div className="p-4 border rounded-lg bg-white shadow-sm flex justify-between items-center gap-2">
             <p className="text-gray-600 break-all">
-              {`localhost:3000/api/v1/${shortUrl}`}
+              {`${window.location.origin}/${shortUrl}`}
             </p>
             <Button onClick={handleCopy} variant="outline" size="sm">
               {copied ? "Copied!" : "Copy"}

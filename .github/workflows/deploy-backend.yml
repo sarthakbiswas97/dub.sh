@@ -26,6 +26,8 @@ jobs:
           file: ./backend/Dockerfile
           push: true
           tags: sarthaksbiswas29/dubsh:${{ github.sha }}
+          build-args: |
+            DATABASE_URL=${{ secrets.DATABASE_URL}}
 
       - name: Executing Remote SSH Commands
         uses: appleboy/ssh-action@master

@@ -1,10 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { API_URL } from "@/constants";
 import axios from "axios";
 import { useState } from "react";
-
-
-const API_URL = import.meta.env.VITE_API_URL || "https://api.dubsh.sbiswas.xyz";
 
 export default function Home() {
   const [value, setValue] = useState("");

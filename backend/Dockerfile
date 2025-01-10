@@ -1,4 +1,5 @@
 FROM node:18-alpine
+ARG DATABASE_URL
 
 WORKDIR /app
 
@@ -21,6 +22,7 @@ RUN npx prisma generate
 # Copy the rest of the application code
 COPY . .
 
+ENV DATABASE_URL=${DATABASE_URL}
 # Build TypeScript code
 RUN npm run build
 

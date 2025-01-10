@@ -19,5 +19,6 @@ app.use("/api/v1",urlRoute)
 app.use("/:url",getUrl)
 
 app.listen("3000",()=>{
+    console.log("database url is ",process.env.DATABASE_URL)
     console.log(`listening to port 3000`);
 })

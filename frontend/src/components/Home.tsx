@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { useState } from "react";
 
-
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Home() {
@@ -11,11 +10,12 @@ export default function Home() {
   const [shortUrl, setShortUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCopy = async () => {
     try {
       if (shortUrl) {
-        await navigator.clipboard.writeText(`${window.location.origin}/${shortUrl}`);
+        await navigator.clipboard.writeText(`${API_URL}/api/v1/${shortUrl}`);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }
@@ -32,14 +32,16 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+    setIsLoading(true);
 
     if (!value.trim()) {
       setError("Please enter a URL");
+      setIsLoading(false);
       return;
     }
 
     try {
-      const response = await axios.post(`${API_URL}/api/v1/create-url`, {
+      const response = await axios.post(`${API_URL}/api/v1/url`, {
         url: value,
       }, {
         headers: {
@@ -47,14 +49,26 @@ export default function Home() {
         }
       });
 
-      if (response.data?.shortUrl?.shortUrl) {
-        setShortUrl(response.data.shortUrl.shortUrl);
+      if (response.data?.shortUrl) {
+        setShortUrl(response.data.shortUrl);
       } else {
         throw new Error('Invalid response format');
       }
     } catch (error) {
       console.error('Error shortening URL:', error);
-      setError(error instanceof Error ? error.message : 'Failed to shorten URL');
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 404) {
+          setError('API endpoint not found. Please check the API URL.');
+        } else if (error.response?.status === 400) {
+          setError('Invalid URL provided. Please check the URL and try again.');
+        } else {
+          setError(error.response?.data?.message || 'Failed to shorten URL');
+        }
+      } else {
+        setError('An unexpected error occurred');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -72,12 +86,14 @@ export default function Home() {
             onChange={handleChange}
             value={value}
             className="w-full h-12"
+            disabled={isLoading}
           />
           <Button
             type="submit"
             className="w-full h-12 shadow-sm hover:shadow-md transition-shadow"
+            disabled={isLoading}
           >
-            Shorten URL
+            {isLoading ? 'Processing...' : 'Shorten URL'}
           </Button>
         </form>
 
@@ -90,9 +106,14 @@ export default function Home() {
         {shortUrl && (
           <div className="p-4 border rounded-lg bg-white shadow-sm flex justify-between items-center gap-2">
             <p className="text-gray-600 break-all">
-              {`${window.location.origin}/${shortUrl}`}
+              {`${API_URL}/${shortUrl}`}
             </p>
-            <Button onClick={handleCopy} variant="outline" size="sm">
+            <Button 
+              onClick={handleCopy} 
+              variant="outline" 
+              size="sm"
+              disabled={isLoading}
+            >
               {copied ? "Copied!" : "Copy"}
             </Button>
           </div>

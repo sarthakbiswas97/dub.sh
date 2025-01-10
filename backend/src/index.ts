@@ -2,6 +2,7 @@ import express from "express";
 import urlRoute from "./routes"
 import dotenv from "dotenv";
 import cors from "cors";
+import { getUrl } from "./handler";
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.get("/health",(req,res)=>{
 })
 
 app.use("/api/v1",urlRoute)
+app.use("/:url",getUrl)
 
 app.listen("3000",()=>{
     console.log(`listening to port 3000`);

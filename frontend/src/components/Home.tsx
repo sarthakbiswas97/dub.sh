@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { useState } from "react";
 
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Home() {
@@ -15,7 +16,7 @@ export default function Home() {
   const handleCopy = async () => {
     try {
       if (shortUrl) {
-        await navigator.clipboard.writeText(`${API_URL}/api/v1/${shortUrl}`);
+        await navigator.clipboard.writeText(`dubsh.sbiswas.xyz/${shortUrl}`);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }
@@ -41,31 +42,29 @@ export default function Home() {
     }
 
     try {
-      const response = await axios.post(`${API_URL}/api/v1/url`, {
+      const response = await axios.post(`${API_URL}/api/v1/create-url`, {
         url: value,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
       });
 
-      if (response.data?.shortUrl) {
-        setShortUrl(response.data.shortUrl);
+      console.log('Response:', response.data);
+
+      if (response.data?.shortUrl?.shortUrl) {
+        setShortUrl(response.data.shortUrl.shortUrl);
       } else {
         throw new Error('Invalid response format');
       }
     } catch (error) {
-      console.error('Error shortening URL:', error);
+      console.error('Error details:', error);
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 404) {
-          setError('API endpoint not found. Please check the API URL.');
+          setError('URL shortening service is currently unavailable');
         } else if (error.response?.status === 400) {
-          setError('Invalid URL provided. Please check the URL and try again.');
+          setError('Invalid URL');
         } else {
           setError(error.response?.data?.message || 'Failed to shorten URL');
         }
       } else {
-        setError('An unexpected error occurred');
+        setError('unexpected error occurred');
       }
     } finally {
       setIsLoading(false);
@@ -82,7 +81,7 @@ export default function Home() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             type="url"
-            placeholder="Shorten any link"
+            placeholder="Enter your long URL"
             onChange={handleChange}
             value={value}
             className="w-full h-12"
@@ -93,7 +92,7 @@ export default function Home() {
             className="w-full h-12 shadow-sm hover:shadow-md transition-shadow"
             disabled={isLoading}
           >
-            {isLoading ? 'Processing...' : 'Shorten URL'}
+            {isLoading ? 'Processing...' : 'Short URL'}
           </Button>
         </form>
 
@@ -106,7 +105,7 @@ export default function Home() {
         {shortUrl && (
           <div className="p-4 border rounded-lg bg-white shadow-sm flex justify-between items-center gap-2">
             <p className="text-gray-600 break-all">
-              {`${API_URL}/${shortUrl}`}
+              {`dubsh.sbiswas.xyz/${shortUrl}`}
             </p>
             <Button 
               onClick={handleCopy} 

@@ -5,7 +5,6 @@ import cors from "cors";
 import { getUrl } from "./handler";
 
 const app = express();
-// testing github workflow
 
 dotenv.config();
 
